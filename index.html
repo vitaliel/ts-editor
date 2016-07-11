@@ -3,14 +3,36 @@
 <head>
     <meta charset="UTF-8" />
     <title>Hello React!</title>
+    <style>
+        #toolbar {
+            width: 800px;
+            height: 100px;
+            border: 1px black solid;
+            margin-bottom: 10px;
+        }
+
+        #canvas_area {
+            width: 800px;
+            height: 800px;
+            border: 1px black solid;
+        }
+
+    </style>
 </head>
 <body>
+
+<div id="editor"></div>
+
 <div id="hello_example"></div>
+
 <div id="timer"></div>
 
 <!-- Dependencies -->
 <script src="./node_modules/react/dist/react.js"></script>
 <script src="./node_modules/react-dom/dist/react-dom.js"></script>
+
+<script src="./node_modules/redux/dist/redux.js"></script>
+<script src="./node_modules/react-redux/dist/react-redux.js"></script>
 
 <!-- Main -->
 <script src="./dist/bundle.js"></script>
