@@ -6,8 +6,16 @@ import { Timer } from "./components/Timer";
 
 import { EditorApp } from "./components/EditorApp";
 
+import { Provider } from 'react-redux'
+import { createStore } from 'redux'
+import editorApp from './reducers'
+
+let store = createStore(editorApp);
+
 ReactDOM.render(
-    <EditorApp />,
+    <Provider store={store}>
+        <EditorApp />
+    </Provider>,
     document.getElementById("editor")
 );
 
