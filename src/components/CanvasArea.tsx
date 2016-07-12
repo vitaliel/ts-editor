@@ -37,14 +37,14 @@ const canvasTarget = {
         // can just use componentWillReceiveProps() to handle enter/leave.
 
         // You can access the coordinates if you need them
-        const clientOffset = monitor.getClientOffset();
-        const componentRect = findDOMNode(component).getBoundingClientRect();
+        // const clientOffset = monitor.getClientOffset();
+        // const componentRect = findDOMNode(component).getBoundingClientRect();
 
         // You can check whether we're over a nested drop target
-        const isJustOverThisOne = monitor.isOver({ shallow: true });
+        // const isJustOverThisOne = monitor.isOver({ shallow: true });
 
         // You will receive hover() even for items for which canDrop() is false
-        const canDrop = monitor.canDrop();
+        // const canDrop = monitor.canDrop();
     },
 
     drop(props : any, monitor: any, component: any) {
@@ -57,17 +57,20 @@ const canvasTarget = {
         }
 
         // Obtain the dragged item
-        const item = monitor.getItem();
+        //const item = monitor.getItem();
+        const componentRect = findDOMNode(component).getBoundingClientRect();
 
-        console.log('drop getClientOffset', monitor.getClientOffset());
+        // console.log('drop getClientOffset', monitor.getClientOffset());
         // You can do something with it
-        //ChessActions.movePiece(item.fromPosition, props.position);
+        //AppActions.movePiece(item.fromPosition, props.position);
 
         // You can also do nothing and return a drop result,
         // which will be available as monitor.getDropResult()
         // in the drag source's endDrag() method
-        console.log('drop getSourceClientOffset', monitor.getSourceClientOffset());
-        return monitor.getClientOffset();
+        // console.log('drop getSourceClientOffset', monitor.getSourceClientOffset());
+        let { x, y } = monitor.getClientOffset();
+
+        return { x: x - componentRect.left, y: y - componentRect.top };
     }
 };
 

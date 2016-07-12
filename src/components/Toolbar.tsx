@@ -6,7 +6,7 @@ export class Toolbar extends React.Component<any, any> {
     render() {
         return (
             <div id="toolbar">
-                <Square type="square" width={70} height={70} x={10} y={10} />
+                <Square draggable={true} width={70} height={70} x={10} y={10} />
             </div>
         );
     }

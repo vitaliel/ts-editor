@@ -17,9 +17,8 @@ const figureSource = {
     endDrag(props : any, monitor : any, component: any) {
         console.log('End drag', props, component, monitor);
         let { x, y } = monitor.getDropResult();
-        //debugger;
-        // component.props.fireCreate('square', x, y)
-        component.store.dispatch(addFigure('square', x, y))
+
+        component.store.dispatch(addFigure(component.type, x, y))
     }
 };
 
@@ -41,11 +40,18 @@ const mapDispatchToProps = (dispatch: any) => {
 };
 
 class Square extends React.Component<FigureProps, any> {
+    type: string;
+
+    constructor(props: FigureProps) {
+        super(props);
+        this.type = 'square';
+    }
+
     render() {
         const { connectDragSource } = this.props;
 
         return connectDragSource(
-            <svg className="draggable"
+            <svg className={this.props.draggable ? 'draggable' : ''}
                 width={this.props.width} height={this.props.height} x={this.props.x} y={this.props.y}>
                <rect x="0" y="0" width="100%" height="100%" fill="#fff" stroke="#000" />
             </svg>
