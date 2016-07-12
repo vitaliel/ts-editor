@@ -1,14 +1,57 @@
 import * as React from "react";
-import { FigureProps } from "./FigureProps";
+import { connect } from 'react-redux'
+import { DragSource } from 'react-dnd';
 
-export class Square extends React.Component<FigureProps, {}> {
+import { FigureProps } from "./FigureProps";
+import { ItemTypes } from './Constants';
+import { addFigure } from "../actions/index";
+
+/**
+ * Implements the drag source contract.
+ */
+const figureSource = {
+    beginDrag(props: any) {
+        console.log('Begin drag', props);
+        return { type: props.type };
+    },
+    endDrag(props : any, monitor : any, component: any) {
+        console.log('End drag', props, component, monitor);
+        let { x, y } = monitor.getDropResult();
+        //debugger;
+        // component.props.fireCreate('square', x, y)
+        component.store.dispatch(addFigure('square', x, y))
+    }
+};
+
+/**
+ * Specifies the props to inject into your component.
+ */
+function collect(connect : any, monitor : any) {
+    return {
+        connectDragSource: connect.dragSource()
+    };
+}
+
+const mapDispatchToProps = (dispatch: any) => {
+    return {
+        fireCreate: (type: string, x:number, y:number) => {
+            dispatch(addFigure(type, x, y))
+        }
+    }
+};
+
+class Square extends React.Component<FigureProps, any> {
     render() {
-        return (
-            <svg width={this.props.width} height={this.props.height} x={this.props.x} y={this.props.y}>
-                <g>
-                   <rect x="0" y="0" width="100%" height="100%" fill="#fff" stroke="#000"/>
-                </g>
+        const { connectDragSource } = this.props;
+
+        return connectDragSource(
+            <svg className="draggable"
+                width={this.props.width} height={this.props.height} x={this.props.x} y={this.props.y}>
+               <rect x="0" y="0" width="100%" height="100%" fill="#fff" stroke="#000" />
             </svg>
         );
     }
 }
+
+let decorated = connect(null, mapDispatchToProps)(Square);
+export default DragSource(ItemTypes.FIGURE, figureSource, collect)(decorated);

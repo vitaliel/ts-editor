@@ -6,9 +6,10 @@
     <style>
         #toolbar {
             width: 800px;
-            height: 100px;
+            height: 75px;
             border: 1px black solid;
             margin-bottom: 10px;
+            padding: 10px;
         }
 
         #canvas_area {
@@ -16,7 +17,9 @@
             height: 800px;
             border: 1px black solid;
         }
-
+        .draggable {
+            cursor: move;
+        }
     </style>
 </head>
 <body>
@@ -30,9 +33,6 @@
 <!-- Dependencies -->
 <script src="./node_modules/react/dist/react.js"></script>
 <script src="./node_modules/react-dom/dist/react-dom.js"></script>
-
-<script src="./node_modules/redux/dist/redux.js"></script>
-<script src="./node_modules/react-redux/dist/react-redux.js"></script>
 
 <!-- Main -->
 <script src="./dist/bundle.js"></script>

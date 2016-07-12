@@ -4,7 +4,7 @@ import * as ReactDOM from "react-dom";
 import { Hello } from "./components/Hello";
 import { Timer } from "./components/Timer";
 
-import { EditorApp } from "./components/EditorApp";
+import EditorApp from "./components/EditorApp";
 
 import { Provider } from 'react-redux'
 import { createStore } from 'redux'

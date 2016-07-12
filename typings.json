@@ -1,6 +1,8 @@
 {
   "globalDependencies": {
     "react": "registry:dt/react#0.14.0+20160630100702",
+    "react-dnd": "registry:dt/react-dnd#1.1.4+20160316155526",
+    "react-dnd-html5-backend": "registry:dt/react-dnd-html5-backend#2.1.2+20160704104003",
     "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",
     "react-redux": "registry:dt/react-redux#4.4.0+20160703120921",
     "redux": "registry:dt/redux#3.5.2+20160703092728"

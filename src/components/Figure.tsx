@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Square } from "./Square";
+import Square from "./Square";
 
 export class Figure extends React.Component<any, any> {
     // TODO add later circle, triangle
