@@ -1,0 +1,10 @@
+# TODO
+
+* Add circle, triangle shapes to toolbar
+* Check if DnD for circle, triangle works
+* User can select and move shape to other position on canvas
+* Add buttons for bring to top and send to back
+
+# BUGS
+
+* Figure out why toolbar shape can not be always draggable
