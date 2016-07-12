@@ -3,6 +3,7 @@
 Install dev tools
 
     npm install -g typescript typings webpack
+    typings install
 
 Additional typings
 
