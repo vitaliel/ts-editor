@@ -6,9 +6,3 @@
 * Add buttons for bring to top and send to back
 
 # BUGS
-
-* Figure out why toolbar shape can not be always draggable
-html5 drag and drop does not work on svg elements
-https://github.com/gaearon/react-dnd/issues/395
-
-old-school script: http://www.quirksmode.org/js/dragdrop.html
