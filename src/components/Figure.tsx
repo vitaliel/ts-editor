@@ -4,6 +4,6 @@ import Square from "./Square";
 export class Figure extends React.Component<any, any> {
     // TODO add later circle, triangle
     render() {
-        return <Square draggable={true} width={70} height={70} x={this.props.x} y={this.props.y} />;
+        return <Square id={this.props.id} draggable={true} width={70} height={70} x={this.props.x} y={this.props.y} />;
     }
 }

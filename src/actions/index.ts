@@ -11,3 +11,14 @@ export const addFigure = (type : string, x: number, y: number) => {
         }
     }
 };
+
+export const moveFigure = (id : number, x: number, y: number) => {
+    return {
+        type: 'MOVE_FIGURE',
+        figure: {
+            id: id,
+            x: x,
+            y: y
+        }
+    }
+};

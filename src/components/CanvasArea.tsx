@@ -13,8 +13,6 @@ const mapDispatchToProps = (dispatch: any) => {
     }
 };
 
-const mapStateToProps = (state: any) => { return {} };
-
 interface ICanvasArea {
     onDropFigure(type: string, x: number, y :number): void;
 }
@@ -32,7 +30,7 @@ class CanvasArea extends React.Component<ICanvasArea, any> {
         const dy = parseInt(e.dataTransfer.getData("y"));
         const x = e.clientX - rect.left - dx, y = e.clientY - rect.top - dy;
 
-        this.props.onDropFigure(e.dataTransfer.getData("share"), x, y);
+        this.props.onDropFigure(e.dataTransfer.getData("shape"), x, y);
     }
 
     render() {
@@ -47,4 +45,4 @@ class CanvasArea extends React.Component<ICanvasArea, any> {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(CanvasArea);
+export default connect(null, mapDispatchToProps)(CanvasArea);

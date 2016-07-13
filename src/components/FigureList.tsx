@@ -6,7 +6,7 @@ class FigureList extends React.Component<any, any> {
     render() {
         return (<svg width="100%" height="100%">
             {this.props.figures.map(
-                (figure:any) =>
+                (figure : any) =>
                     <Figure key={figure.id} {...figure} />
             )}
         </svg>
