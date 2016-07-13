@@ -6,7 +6,8 @@ const figures = (state: any[] = [], action: any) => {
                 action.figure
             ];
         case 'MOVE_FIGURE':
-            const figure = state.find(e => e.id == action.figure.id);
+            const oldFigure = state.find(e => e.id == action.figure.id);
+            const figure = Object.assign({}, oldFigure);
             figure.x = action.figure.x;
             figure.y = action.figure.y;
             return state.filter(e => e.id != action.figure.id).concat(figure);
