@@ -50,7 +50,7 @@
 	const EditorApp_1 = __webpack_require__(3);
 	const react_redux_1 = __webpack_require__(11);
 	const redux_1 = __webpack_require__(19);
-	const reducers_1 = __webpack_require__(39);
+	const reducers_1 = __webpack_require__(40);
 	let store = redux_1.createStore(reducers_1.default);
 	ReactDOM.render(React.createElement(react_redux_1.Provider, {store: store}, React.createElement(EditorApp_1.default, null)), document.getElementById("editor"));
 
@@ -75,10 +75,11 @@
 	const React = __webpack_require__(1);
 	const Toolbar_1 = __webpack_require__(4);
 	const CanvasArea_1 = __webpack_require__(9);
-	const AddButton_1 = __webpack_require__(38);
+	const OnBottomButton_1 = __webpack_require__(38);
+	const OnTopButton_1 = __webpack_require__(39);
 	class EditorApp extends React.Component {
 	    render() {
-	        return (React.createElement("div", {id: "editor_app"}, React.createElement(Toolbar_1.Toolbar, null), React.createElement(AddButton_1.default, null), React.createElement(CanvasArea_1.default, null)));
+	        return (React.createElement("div", {id: "editor_app"}, React.createElement(Toolbar_1.Toolbar, null), React.createElement("div", null, React.createElement(OnTopButton_1.default, null), ' ', React.createElement(OnBottomButton_1.default, null)), React.createElement(CanvasArea_1.default, null)));
 	    }
 	}
 	Object.defineProperty(exports, "__esModule", { value: true });
@@ -202,6 +203,9 @@
 	    return {
 	        onDropFigure: (type, x, y) => {
 	            dispatch(index_1.addFigure(type, x, y));
+	        },
+	        onDeselectAll: () => {
+	            dispatch(index_1.deselectAll());
 	        }
 	    };
 	};
@@ -220,7 +224,7 @@
 	    render() {
 	        let onDragOver = this.onDragOver.bind(this);
 	        let onDrop = this.onDrop.bind(this);
-	        return (React.createElement("div", {id: "canvas_area", onDragOver: onDragOver, onDrop: onDrop}, React.createElement(FigureList_1.default, null)));
+	        return (React.createElement("div", {id: "canvas_area", onDragOver: onDragOver, onDrop: onDrop, onClick: () => this.props.onDeselectAll()}, React.createElement(FigureList_1.default, null)));
 	    }
 	}
 	Object.defineProperty(exports, "__esModule", { value: true });
@@ -1945,17 +1949,33 @@
 	    return {
 	        onMoveFigure: (id, x, y) => {
 	            dispatch(index_1.moveFigure(id, x, y));
+	        },
+	        onSelectFigure: (id) => {
+	            dispatch(index_1.selectFigure(id));
 	        }
 	    };
 	};
+	const size = 70;
 	class Shape extends React.Component {
+	    constructor(...args) {
+	        super(...args);
+	        this.dragElements = [];
+	    }
+	    onClick(e) {
+	        e.stopPropagation();
+	        this.props.onSelectFigure(this.props.id);
+	    }
 	    onMouseDown(e) {
 	        if (e.button != 0)
 	            return;
 	        new drag_drop_1.DragSession(e, (e) => {
-	            this.refs.element.style.transform = `translate(${e.translation.x}px, ${e.translation.y}px)`;
+	            this.dragElements.forEach((ref, i) => {
+	                this.refs[ref].style.transform = `translate(${e.translation.x}px, ${e.translation.y}px)`;
+	            });
 	        }, (e) => {
-	            this.refs.element.style.transform = "";
+	            this.dragElements.forEach((ref, i) => {
+	                this.refs[ref].style.transform = "";
+	            });
 	            const dm = e.translation;
 	            if (dm.x != 0 || dm.y != 0) {
 	                let nx = this.props.x + dm.x;
@@ -1964,10 +1984,9 @@
 	            }
 	        });
 	    }
-	    // svg does not support style.transform
-	    render() {
+	    renderShape() {
 	        let onMouseDown = this.onMouseDown.bind(this);
-	        const size = 70;
+	        let onClick = this.onClick.bind(this);
 	        if (this.props.type == 'triangle') {
 	            const x1 = this.props.x, y1 = this.props.y + size;
 	            const x2 = this.props.x + size;
@@ -1975,12 +1994,28 @@
 	            const x3 = this.props.x + size / 2;
 	            const y3 = this.props.y;
 	            const points = `${x1},${y1} ${x2},${y2} ${x3},${y3}`;
-	            return React.createElement("polygon", {onMouseDown: onMouseDown, ref: "element", points: points, fill: "#fff", stroke: "#000"});
+	            return React.createElement("polygon", {onMouseDown: onMouseDown, onClick: onClick, ref: "element", points: points, fill: "#fff", stroke: "#000"});
 	        }
-	        else if (this.props.type == 'circle')
-	            return React.createElement("ellipse", {onMouseDown: onMouseDown, ref: "element", cx: this.props.x, cy: this.props.y, rx: size / 2, ry: size / 2, fill: "#fff", stroke: "#000"});
+	        else if (this.props.type == 'circle') {
+	            const r = size / 2;
+	            return React.createElement("ellipse", {onMouseDown: onMouseDown, onClick: onClick, ref: "element", cx: this.props.x + r, cy: this.props.y + r, rx: r, ry: r, fill: "#fff", stroke: "#000"});
+	        }
 	        else
-	            return (React.createElement("rect", {onMouseDown: onMouseDown, ref: "element", width: size, height: size, x: this.props.x, y: this.props.y, fill: "#fff", stroke: "#000"}));
+	            return (React.createElement("rect", {onMouseDown: onMouseDown, onClick: onClick, ref: "element", width: size, height: size, x: this.props.x, y: this.props.y, fill: "#fff", stroke: "#000"}));
+	    }
+	    renderSelectionPoint(ref, x, y) {
+	        return React.createElement("rect", {ref: ref, x: x - 2, y: y - 2, width: 4, height: 4, fill: "#000", stroke: "#000"});
+	    }
+	    // svg does not support style.transform
+	    render() {
+	        this.dragElements = ['element'];
+	        if (this.props.selected) {
+	            this.dragElements = this.dragElements.concat('select_rect', 'p1', 'p2', 'p3', 'p4');
+	            return React.createElement("g", null, React.createElement("rect", {ref: 'select_rect', x: this.props.x, y: this.props.y, width: size, height: size, fill: "#fff", stroke: "#000"}), this.renderSelectionPoint('p1', this.props.x, this.props.y), this.renderSelectionPoint('p2', this.props.x + size, this.props.y), this.renderSelectionPoint('p3', this.props.x, this.props.y + size), this.renderSelectionPoint('p4', this.props.x + size, this.props.y + size), this.renderShape());
+	        }
+	        else {
+	            return this.renderShape();
+	        }
 	    }
 	}
 	Object.defineProperty(exports, "__esModule", { value: true });
@@ -2058,7 +2093,8 @@
 	            id: nextFigureId++,
 	            type: type,
 	            x: x,
-	            y: y
+	            y: y,
+	            selected: false
 	        }
 	    };
 	};
@@ -2072,6 +2108,29 @@
 	        }
 	    };
 	};
+	exports.selectFigure = (id) => {
+	    return {
+	        type: 'SELECT_FIGURE',
+	        figure: {
+	            id: id,
+	        }
+	    };
+	};
+	exports.sendToBack = () => {
+	    return {
+	        type: 'SEND_TO_BACK'
+	    };
+	};
+	exports.bringToTop = () => {
+	    return {
+	        type: 'BRING_TO_TOP'
+	    };
+	};
+	exports.deselectAll = () => {
+	    return {
+	        type: 'DESELECT_ALL'
+	    };
+	};
 
 
 /***/ },
@@ -2081,30 +2140,65 @@
 	"use strict";
 	const React = __webpack_require__(1);
 	const react_redux_1 = __webpack_require__(11);
-	const actions_1 = __webpack_require__(37);
+	const index_1 = __webpack_require__(37);
 	const mapDispatchToProps = (dispatch) => {
 	    return {
 	        onClick: () => {
-	            let x = Math.floor(Math.random() * 700), y = Math.floor(Math.random() * 700);
-	            dispatch(actions_1.addFigure('square', x, y));
+	            dispatch(index_1.sendToBack());
 	        }
 	    };
 	};
-	class AddButton extends React.Component {
+	const mapStateToProps = (state) => {
+	    return {
+	        disabled: !state.some(fig => fig.selected)
+	    };
+	};
+	class OnBottomButton extends React.Component {
 	    render() {
-	        return (React.createElement("button", {onClick: () => this.props.onClick()}, "Add Square"));
+	        return (React.createElement("button", {disabled: this.props.disabled, onClick: () => this.props.onClick()}, "Send to Back"));
 	    }
 	}
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = react_redux_1.connect(null, mapDispatchToProps)(AddButton);
+	exports.default = react_redux_1.connect(mapStateToProps, mapDispatchToProps)(OnBottomButton);
 
 
 /***/ },
 /* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	const React = __webpack_require__(1);
+	const react_redux_1 = __webpack_require__(11);
+	const actions_1 = __webpack_require__(37);
+	const mapDispatchToProps = (dispatch) => {
+	    return {
+	        onClick: () => {
+	            dispatch(actions_1.bringToTop());
+	        }
+	    };
+	};
+	const mapStateToProps = (state) => {
+	    return {
+	        disabled: !state.some(fig => fig.selected)
+	    };
+	};
+	class OnTopButton extends React.Component {
+	    render() {
+	        return (React.createElement("button", {disabled: this.props.disabled, onClick: () => this.props.onClick()}, "Bring to Top"));
+	    }
+	}
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = react_redux_1.connect(mapStateToProps, mapDispatchToProps)(OnTopButton);
+
+
+/***/ },
+/* 40 */
 /***/ function(module, exports) {
 
 	"use strict";
 	const figures = (state = [], action) => {
+	    let figure;
+	    let newState = [];
 	    switch (action.type) {
 	        case 'ADD_FIGURE':
 	            return [
@@ -2112,11 +2206,62 @@
 	                action.figure
 	            ];
 	        case 'MOVE_FIGURE':
-	            const oldFigure = state.find(e => e.id == action.figure.id);
-	            const figure = Object.assign({}, oldFigure);
-	            figure.x = action.figure.x;
-	            figure.y = action.figure.y;
-	            return state.filter(e => e.id != action.figure.id).concat(figure);
+	            for (let i = 0; i < state.length; i++) {
+	                const figure = state[i];
+	                if (figure.id == action.figure.id) {
+	                    newState.push(Object.assign({}, figure, { x: action.figure.x, y: action.figure.y }));
+	                }
+	                else {
+	                    newState.push(figure);
+	                }
+	            }
+	            return newState;
+	        case 'SELECT_FIGURE':
+	            for (let i = 0; i < state.length; i++) {
+	                const figure = state[i];
+	                if (figure.id == action.figure.id) {
+	                    newState.push(Object.assign({}, figure, { selected: true }));
+	                }
+	                else if (figure.selected) {
+	                    newState.push(Object.assign({}, figure, { selected: false }));
+	                }
+	                else {
+	                    newState.push(figure);
+	                }
+	            }
+	            return newState;
+	        case 'SEND_TO_BACK':
+	            figure = state.find(e => e.selected);
+	            if (figure) {
+	                return [figure, ...state.filter(e => e.id != figure.id)];
+	            }
+	            else {
+	                return state;
+	            }
+	        case 'BRING_TO_TOP':
+	            figure = state.find(e => e.selected);
+	            if (figure) {
+	                return [...state.filter(e => e.id != figure.id), figure];
+	            }
+	            else {
+	                return state;
+	            }
+	        case 'DESELECT_ALL':
+	            if (state.some(f => f.selected)) {
+	                for (let i = 0; i < state.length; i++) {
+	                    const figure = state[i];
+	                    if (figure.selected) {
+	                        newState.push(Object.assign({}, figure, { selected: false }));
+	                    }
+	                    else {
+	                        newState.push(figure);
+	                    }
+	                }
+	                return newState;
+	            }
+	            else {
+	                return state;
+	            }
 	        default:
 	            return state;
 	    }
