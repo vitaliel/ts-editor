@@ -1,10 +1,8 @@
 export interface FigureProps {
     id: number;
     type: string;
-    width: number;
-    height: number;
     x: number;
     y: number;
+    selected?: boolean;
     draggable: boolean;
-    onMoveFigure?: (id: number, x: number, y :number) => void;
 }
