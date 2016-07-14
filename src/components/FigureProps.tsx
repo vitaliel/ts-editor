@@ -1,5 +1,6 @@
 export interface FigureProps {
     id: number;
+    type: string;
     width: number;
     height: number;
     x: number;
