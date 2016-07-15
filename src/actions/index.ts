@@ -1,6 +1,6 @@
 let nextFigureId = 0;
 
-export const addFigure = (type : string, x: number, y: number) => {
+export function addFigure(type: string, x: number, y: number) {
     return {
         type: 'ADD_FIGURE',
         figure: {
@@ -11,42 +11,24 @@ export const addFigure = (type : string, x: number, y: number) => {
             selected: false
         }
     }
-};
+}
 
-export const moveFigure = (id : number, x: number, y: number) => {
-    return {
-        type: 'MOVE_FIGURE',
-        figure: {
-            id: id,
-            x: x,
-            y: y
-        }
-    }
-};
+export function moveFigure(id: number, x: number, y: number) {
+    return { type: 'MOVE_FIGURE', figure: { id: id, x: x, y: y } }
+}
 
-export const selectFigure = (id : number) => {
-    return {
-        type: 'SELECT_FIGURE',
-        figure: {
-            id: id,
-        }
-    }
-};
+export function selectFigure(id: number) {
+    return { type: 'SELECT_FIGURE', figure: { id: id, } }
+}
 
-export const sendToBack = () => {
-    return {
-        type: 'SEND_TO_BACK'
-    }
-};
+export function sendToBack() {
+    return { type: 'SEND_TO_BACK' }
+}
 
-export const bringToTop = () => {
-    return {
-        type: 'BRING_TO_TOP'
-    }
-};
+export function bringToTop() {
+    return { type: 'BRING_TO_TOP' }
+}
 
-export const deselectAll = () => {
-    return {
-        type: 'DESELECT_ALL'
-    }
-};
+export function deselectAll() {
+    return { type: 'DESELECT_ALL' }
+}

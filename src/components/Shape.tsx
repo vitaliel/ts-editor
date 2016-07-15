@@ -1,8 +1,15 @@
 import * as React from "react";
-import {FigureProps} from "./FigureProps";
 import {DragSessionEvent, DragSession} from "../utils/drag_drop/drag_drop";
 import {moveFigure, selectFigure} from "../actions/index";
 import {connect} from "react-redux";
+
+export interface FigureProps {
+    id: number;
+    type: string;
+    x: number;
+    y: number;
+    selected?: boolean;
+}
 
 interface Dispatch {
     onMoveFigure: (id: number, x: number, y: number) => void;
@@ -23,8 +30,6 @@ const mapDispatchToProps = (dispatch: any): any => {
 const size = 70;
 
 class Shape extends React.Component<FigureProps & Dispatch, any> {
-    dragElements: String[] = [];
-
     // hack :-)
     refs: {
         [key: string]: HTMLElement;
@@ -39,17 +44,27 @@ class Shape extends React.Component<FigureProps & Dispatch, any> {
     onMouseDown(e: MouseEvent) {
         if (e.button != 0) return;
 
+        if (!this.props.selected) {
+            return;
+        }
+
         new DragSession(
             e,
             (e: DragSessionEvent) => {
-                this.dragElements.forEach((ref:string, i:number) => {
-                    this.refs[ref].style.transform = `translate(${e.translation.x}px, ${e.translation.y}px)`;
-                })
+                const selectedElements = document.querySelectorAll("#canvas_area .selected");
+
+                for (let i = 0; i < selectedElements.length; i++) {
+                    const element = selectedElements[i] as HTMLElement;
+                    element.style.transform = `translate(${e.translation.x}px, ${e.translation.y}px)`;
+                }
             },
             (e: DragSessionEvent) => {
-                this.dragElements.forEach((ref:string, i:number) => {
-                    this.refs[ref].style.transform = "";
-                });
+                const selectedElements = document.querySelectorAll("#canvas_area .selected");
+
+                for (let i = 0; i < selectedElements.length; i++) {
+                    const element = selectedElements[i] as HTMLElement;
+                    element.style.transform = "";
+                }
 
                 const dm = e.translation;
 
@@ -62,9 +77,10 @@ class Shape extends React.Component<FigureProps & Dispatch, any> {
         );
     }
 
-    renderShape() {
+    render() {
         let onMouseDown = this.onMouseDown.bind(this);
         let onClick = this.onClick.bind(this);
+        const klass = this.props.selected ? 'selected' : '';
 
         if (this.props.type == 'triangle') {
             const x1 = this.props.x, y1 = this.props.y + size;
@@ -74,46 +90,24 @@ class Shape extends React.Component<FigureProps & Dispatch, any> {
             const y3 = this.props.y;
             const points = `${x1},${y1} ${x2},${y2} ${x3},${y3}`;
             return <polygon onMouseDown={onMouseDown} onClick={onClick}
-                            ref="element" points={points} fill="#fff" stroke="#000"/>;
+                            className={klass}
+                            points={points} fill="#fff" stroke="#000"/>;
         }
         else if (this.props.type == 'circle') {
             const r = size / 2;
             return <ellipse onMouseDown={onMouseDown} onClick={onClick}
-                            ref="element" cx={this.props.x+r} cy={this.props.y+r} rx={r} ry={r} fill="#fff"
+                            className={klass}
+                            cx={this.props.x+r} cy={this.props.y+r} rx={r} ry={r} fill="#fff"
                             stroke="#000"/>;
         } else
             return (
                 <rect onMouseDown={onMouseDown} onClick={onClick}
-                      ref="element"
+                      className={klass}
                       width={size}
                       height={size}
                       x={this.props.x}
                       y={this.props.y} fill="#fff" stroke="#000"/>
             );
-    }
-
-    renderSelectionPoint(ref: string, x: number, y: number) {
-        return <rect ref={ref} x={x - 2} y={y - 2} width={4} height={4} fill="#000" stroke="#000" />
-    }
-
-    // svg does not support style.transform
-    render() {
-        this.dragElements = ['element'];
-
-        if (this.props.selected) {
-            this.dragElements = this.dragElements.concat('select_rect', 'p1', 'p2', 'p3', 'p4');
-
-            return <g>
-                <rect ref='select_rect' x={this.props.x} y={this.props.y} width={size} height={size} fill="#fff" stroke="#000" />
-                {this.renderSelectionPoint('p1', this.props.x, this.props.y)}
-                {this.renderSelectionPoint('p2', this.props.x+size, this.props.y)}
-                {this.renderSelectionPoint('p3', this.props.x, this.props.y+size)}
-                {this.renderSelectionPoint('p4', this.props.x+size, this.props.y+size)}
-                {this.renderShape()}
-            </g>
-        } else {
-            return this.renderShape()
-        }
     }
 }
 
