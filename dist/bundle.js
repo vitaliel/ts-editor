@@ -50,7 +50,7 @@
 	const EditorApp_1 = __webpack_require__(3);
 	const react_redux_1 = __webpack_require__(11);
 	const redux_1 = __webpack_require__(19);
-	const reducers_1 = __webpack_require__(40);
+	const reducers_1 = __webpack_require__(42);
 	let store = redux_1.createStore(reducers_1.default);
 	ReactDOM.render(React.createElement(react_redux_1.Provider, {store: store}, React.createElement(EditorApp_1.default, null)), document.getElementById("editor"));
 
@@ -75,8 +75,8 @@
 	const React = __webpack_require__(1);
 	const Toolbar_1 = __webpack_require__(4);
 	const CanvasArea_1 = __webpack_require__(9);
-	const OnBottomButton_1 = __webpack_require__(38);
-	const OnTopButton_1 = __webpack_require__(39);
+	const OnBottomButton_1 = __webpack_require__(40);
+	const OnTopButton_1 = __webpack_require__(41);
 	class EditorApp extends React.Component {
 	    render() {
 	        return (React.createElement("div", {id: "editor_app"}, React.createElement(Toolbar_1.Toolbar, null), React.createElement("div", null, React.createElement(OnTopButton_1.default, null), ' ', React.createElement(OnBottomButton_1.default, null)), React.createElement(CanvasArea_1.default, null)));
@@ -247,13 +247,17 @@
 	const React = __webpack_require__(1);
 	const react_redux_1 = __webpack_require__(11);
 	const Shape_1 = __webpack_require__(34);
+	const ShapeSelection_1 = __webpack_require__(39);
 	class FigureList extends React.Component {
 	    render() {
-	        return (React.createElement("svg", {width: "100%", height: "100%"}, this.props.figures.map((figure) => React.createElement(Shape_1.default, __assign({key: figure.id}, figure)))));
+	        return (React.createElement("svg", {width: "100%", height: "100%"}, React.createElement("g", {id: "canvas_elements"}, this.props.figures.map((figure) => React.createElement(Shape_1.default, __assign({key: figure.id}, figure)))), React.createElement("g", {id: "selected_elements"}, this.props.selectedFigures.map((figure) => React.createElement(ShapeSelection_1.default, __assign({key: figure.id}, figure))))));
 	    }
 	}
 	const mapStateToProps = (state) => {
-	    return { figures: state };
+	    return {
+	        figures: state.canvas.elements,
+	        selectedFigures: state.canvas.elements.filter((e) => e.selected)
+	    };
 	};
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = react_redux_1.connect(mapStateToProps, null)(FigureList);
@@ -1957,10 +1961,6 @@
 	};
 	const size = 70;
 	class Shape extends React.Component {
-	    constructor(...args) {
-	        super(...args);
-	        this.dragElements = [];
-	    }
 	    onClick(e) {
 	        e.stopPropagation();
 	        this.props.onSelectFigure(this.props.id);
@@ -1968,14 +1968,21 @@
 	    onMouseDown(e) {
 	        if (e.button != 0)
 	            return;
+	        if (!this.props.selected) {
+	            return;
+	        }
 	        new drag_drop_1.DragSession(e, (e) => {
-	            this.dragElements.forEach((ref, i) => {
-	                this.refs[ref].style.transform = `translate(${e.translation.x}px, ${e.translation.y}px)`;
-	            });
+	            const selectedElements = document.querySelectorAll("#canvas_area .selected");
+	            for (let i = 0; i < selectedElements.length; i++) {
+	                const element = selectedElements[i];
+	                element.style.transform = `translate(${e.translation.x}px, ${e.translation.y}px)`;
+	            }
 	        }, (e) => {
-	            this.dragElements.forEach((ref, i) => {
-	                this.refs[ref].style.transform = "";
-	            });
+	            const selectedElements = document.querySelectorAll("#canvas_area .selected");
+	            for (let i = 0; i < selectedElements.length; i++) {
+	                const element = selectedElements[i];
+	                element.style.transform = "";
+	            }
 	            const dm = e.translation;
 	            if (dm.x != 0 || dm.y != 0) {
 	                let nx = this.props.x + dm.x;
@@ -1984,38 +1991,25 @@
 	            }
 	        });
 	    }
-	    renderShape() {
+	    render() {
 	        let onMouseDown = this.onMouseDown.bind(this);
 	        let onClick = this.onClick.bind(this);
-	        if (this.props.type == 'triangle') {
+	        const klass = this.props.selected ? 'selected' : '';
+	        if (this.props.shape == 'triangle') {
 	            const x1 = this.props.x, y1 = this.props.y + size;
 	            const x2 = this.props.x + size;
 	            const y2 = this.props.y + size;
 	            const x3 = this.props.x + size / 2;
 	            const y3 = this.props.y;
 	            const points = `${x1},${y1} ${x2},${y2} ${x3},${y3}`;
-	            return React.createElement("polygon", {onMouseDown: onMouseDown, onClick: onClick, ref: "element", points: points, fill: "#fff", stroke: "#000"});
+	            return React.createElement("polygon", {onMouseDown: onMouseDown, onClick: onClick, className: klass, points: points, fill: "#fff", stroke: "#000"});
 	        }
-	        else if (this.props.type == 'circle') {
+	        else if (this.props.shape == 'circle') {
 	            const r = size / 2;
-	            return React.createElement("ellipse", {onMouseDown: onMouseDown, onClick: onClick, ref: "element", cx: this.props.x + r, cy: this.props.y + r, rx: r, ry: r, fill: "#fff", stroke: "#000"});
+	            return React.createElement("ellipse", {onMouseDown: onMouseDown, onClick: onClick, className: klass, cx: this.props.x + r, cy: this.props.y + r, rx: r, ry: r, fill: "#fff", stroke: "#000"});
 	        }
 	        else
-	            return (React.createElement("rect", {onMouseDown: onMouseDown, onClick: onClick, ref: "element", width: size, height: size, x: this.props.x, y: this.props.y, fill: "#fff", stroke: "#000"}));
-	    }
-	    renderSelectionPoint(ref, x, y) {
-	        return React.createElement("rect", {ref: ref, x: x - 2, y: y - 2, width: 4, height: 4, fill: "#000", stroke: "#000"});
-	    }
-	    // svg does not support style.transform
-	    render() {
-	        this.dragElements = ['element'];
-	        if (this.props.selected) {
-	            this.dragElements = this.dragElements.concat('select_rect', 'p1', 'p2', 'p3', 'p4');
-	            return React.createElement("g", null, React.createElement("rect", {ref: 'select_rect', x: this.props.x, y: this.props.y, width: size, height: size, fill: "#fff", stroke: "#000"}), this.renderSelectionPoint('p1', this.props.x, this.props.y), this.renderSelectionPoint('p2', this.props.x + size, this.props.y), this.renderSelectionPoint('p3', this.props.x, this.props.y + size), this.renderSelectionPoint('p4', this.props.x + size, this.props.y + size), this.renderShape());
-	        }
-	        else {
-	            return this.renderShape();
-	        }
+	            return (React.createElement("rect", {onMouseDown: onMouseDown, onClick: onClick, className: klass, width: size, height: size, x: this.props.x, y: this.props.y, fill: "#fff", stroke: "#000"}));
 	    }
 	}
 	Object.defineProperty(exports, "__esModule", { value: true });
@@ -2082,59 +2076,83 @@
 
 /***/ },
 /* 37 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
+	const CanvasElement_1 = __webpack_require__(38);
 	let nextFigureId = 0;
-	exports.addFigure = (type, x, y) => {
+	function addFigure(shape, x, y) {
 	    return {
 	        type: 'ADD_FIGURE',
-	        figure: {
-	            id: nextFigureId++,
-	            type: type,
-	            x: x,
-	            y: y,
-	            selected: false
-	        }
+	        figure: new CanvasElement_1.CanvasElement(nextFigureId++, shape, x, y)
 	    };
-	};
-	exports.moveFigure = (id, x, y) => {
-	    return {
-	        type: 'MOVE_FIGURE',
-	        figure: {
-	            id: id,
-	            x: x,
-	            y: y
-	        }
-	    };
-	};
-	exports.selectFigure = (id) => {
-	    return {
-	        type: 'SELECT_FIGURE',
-	        figure: {
-	            id: id,
-	        }
-	    };
-	};
-	exports.sendToBack = () => {
-	    return {
-	        type: 'SEND_TO_BACK'
-	    };
-	};
-	exports.bringToTop = () => {
-	    return {
-	        type: 'BRING_TO_TOP'
-	    };
-	};
-	exports.deselectAll = () => {
-	    return {
-	        type: 'DESELECT_ALL'
-	    };
-	};
+	}
+	exports.addFigure = addFigure;
+	function moveFigure(id, x, y) {
+	    return { type: 'MOVE_FIGURE', figure: { id: id, x: x, y: y } };
+	}
+	exports.moveFigure = moveFigure;
+	function selectFigure(id) {
+	    return { type: 'SELECT_FIGURE', figure: { id: id, } };
+	}
+	exports.selectFigure = selectFigure;
+	function sendToBack() {
+	    return { type: 'SEND_TO_BACK' };
+	}
+	exports.sendToBack = sendToBack;
+	function bringToTop() {
+	    return { type: 'BRING_TO_TOP' };
+	}
+	exports.bringToTop = bringToTop;
+	function deselectAll() {
+	    return { type: 'DESELECT_ALL' };
+	}
+	exports.deselectAll = deselectAll;
 
 
 /***/ },
 /* 38 */
+/***/ function(module, exports) {
+
+	"use strict";
+	class CanvasElement {
+	    constructor(id, shape, x, y, width = 70, height = 70, selected = false) {
+	        this.id = id;
+	        this.shape = shape;
+	        this.x = x;
+	        this.y = y;
+	        this.width = width;
+	        this.height = height;
+	        this.selected = selected;
+	    }
+	    clone() {
+	        return new CanvasElement(this.id, this.shape, this.x, this.y, this.width, this.height, this.selected);
+	    }
+	}
+	exports.CanvasElement = CanvasElement;
+
+
+/***/ },
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	const React = __webpack_require__(1);
+	const size = 70;
+	class ShapeSelection extends React.Component {
+	    renderSelectionPoint(x, y) {
+	        return React.createElement("rect", {x: x - 2, y: y - 2, width: 4, height: 4, fill: "#000", stroke: "#000", className: "selected"});
+	    }
+	    render() {
+	        return React.createElement("g", null, React.createElement("rect", {x: this.props.x, y: this.props.y, width: size, height: size, stroke: "#000", className: "selected selected_rect"}), this.renderSelectionPoint(this.props.x, this.props.y), this.renderSelectionPoint(this.props.x + size, this.props.y), this.renderSelectionPoint(this.props.x, this.props.y + size), this.renderSelectionPoint(this.props.x + size, this.props.y + size));
+	    }
+	}
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = ShapeSelection;
+
+
+/***/ },
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2150,7 +2168,7 @@
 	};
 	const mapStateToProps = (state) => {
 	    return {
-	        disabled: !state.some(fig => fig.selected)
+	        disabled: !state.canvas.elements.some(fig => fig.selected)
 	    };
 	};
 	class OnBottomButton extends React.Component {
@@ -2163,7 +2181,7 @@
 
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2179,7 +2197,7 @@
 	};
 	const mapStateToProps = (state) => {
 	    return {
-	        disabled: !state.some(fig => fig.selected)
+	        disabled: !state.canvas.elements.some(fig => fig.selected)
 	    };
 	};
 	class OnTopButton extends React.Component {
@@ -2192,82 +2210,132 @@
 
 
 /***/ },
-/* 40 */
-/***/ function(module, exports) {
+/* 42 */
+/***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	const figures = (state = [], action) => {
-	    let figure;
-	    let newState = [];
+	const AppState_1 = __webpack_require__(43);
+	function editorApp(state = new AppState_1.AppState(), action) {
 	    switch (action.type) {
 	        case 'ADD_FIGURE':
-	            return [
-	                ...state,
-	                action.figure
-	            ];
+	            return state.addElement(action.figure);
 	        case 'MOVE_FIGURE':
-	            for (let i = 0; i < state.length; i++) {
-	                const figure = state[i];
-	                if (figure.id == action.figure.id) {
-	                    newState.push(Object.assign({}, figure, { x: action.figure.x, y: action.figure.y }));
-	                }
-	                else {
-	                    newState.push(figure);
-	                }
-	            }
-	            return newState;
+	            return state.moveElement(action.figure.id, action.figure.x, action.figure.y);
 	        case 'SELECT_FIGURE':
-	            for (let i = 0; i < state.length; i++) {
-	                const figure = state[i];
-	                if (figure.id == action.figure.id) {
-	                    newState.push(Object.assign({}, figure, { selected: true }));
-	                }
-	                else if (figure.selected) {
-	                    newState.push(Object.assign({}, figure, { selected: false }));
-	                }
-	                else {
-	                    newState.push(figure);
-	                }
-	            }
-	            return newState;
+	            return state.selectElement(action.figure.id);
 	        case 'SEND_TO_BACK':
-	            figure = state.find(e => e.selected);
-	            if (figure) {
-	                return [figure, ...state.filter(e => e.id != figure.id)];
-	            }
-	            else {
-	                return state;
-	            }
+	            return state.sendSelectedElementToBack();
 	        case 'BRING_TO_TOP':
-	            figure = state.find(e => e.selected);
-	            if (figure) {
-	                return [...state.filter(e => e.id != figure.id), figure];
-	            }
-	            else {
-	                return state;
-	            }
+	            return state.bringSelectedElementToTop();
 	        case 'DESELECT_ALL':
-	            if (state.some(f => f.selected)) {
-	                for (let i = 0; i < state.length; i++) {
-	                    const figure = state[i];
-	                    if (figure.selected) {
-	                        newState.push(Object.assign({}, figure, { selected: false }));
-	                    }
-	                    else {
-	                        newState.push(figure);
-	                    }
-	                }
-	                return newState;
-	            }
-	            else {
-	                return state;
-	            }
+	            return state.deselectAll();
 	        default:
 	            return state;
 	    }
-	};
+	}
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = figures;
+	exports.default = editorApp;
+
+
+/***/ },
+/* 43 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	const Canvas_1 = __webpack_require__(44);
+	class AppState {
+	    constructor(canvas = new Canvas_1.Canvas()) {
+	        this.canvas = canvas;
+	    }
+	    addElement(elem) {
+	        return new AppState(new Canvas_1.Canvas([
+	            ...this.canvas.elements,
+	            elem
+	        ]));
+	    }
+	    moveElement(id, x, y) {
+	        const newElements = this.canvas.elements.map(element => {
+	            if (element.id == id) {
+	                const newElement = element.clone();
+	                newElement.x = x;
+	                newElement.y = y;
+	                return newElement;
+	            }
+	            else {
+	                return element;
+	            }
+	        });
+	        return new AppState(new Canvas_1.Canvas(newElements));
+	    }
+	    selectElement(id) {
+	        const newElements = this.canvas.elements.map(element => {
+	            if (element.id == id) {
+	                const newElement = element.clone();
+	                newElement.selected = true;
+	                return newElement;
+	            }
+	            else if (element.selected) {
+	                const newElement = element.clone();
+	                newElement.selected = false;
+	                return newElement;
+	            }
+	            else {
+	                return element;
+	            }
+	        });
+	        return new AppState(new Canvas_1.Canvas(newElements));
+	    }
+	    sendSelectedElementToBack() {
+	        const figure = this.canvas.elements.find(e => e.selected);
+	        if (figure) {
+	            return new AppState(new Canvas_1.Canvas([figure, ...this.canvas.elements.filter(e => e.id != figure.id)]));
+	        }
+	        else {
+	            return this;
+	        }
+	    }
+	    bringSelectedElementToTop() {
+	        const figure = this.canvas.elements.find(e => e.selected);
+	        if (figure) {
+	            return new AppState(new Canvas_1.Canvas([...this.canvas.elements.filter(e => e.id != figure.id), figure]));
+	        }
+	        else {
+	            return this;
+	        }
+	    }
+	    deselectAll() {
+	        if (this.canvas.elements.some(f => f.selected)) {
+	            const newElements = this.canvas.elements.map(element => {
+	                if (element.selected) {
+	                    const newElement = element.clone();
+	                    newElement.selected = false;
+	                    return newElement;
+	                }
+	                else {
+	                    return element;
+	                }
+	            });
+	            return new AppState(new Canvas_1.Canvas(newElements));
+	        }
+	        else {
+	            return this;
+	        }
+	    }
+	}
+	exports.AppState = AppState;
+
+
+/***/ },
+/* 44 */
+/***/ function(module, exports) {
+
+	"use strict";
+	class Canvas {
+	    constructor(elements = []) {
+	        this.elements = elements;
+	    }
+	}
+	exports.Canvas = Canvas;
 
 
 /***/ }
