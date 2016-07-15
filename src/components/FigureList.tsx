@@ -2,6 +2,7 @@ import * as React from "react";
 import {connect} from 'react-redux'
 import Shape from "./Shape";
 import ShapeSelection from "./ShapeSelection";
+import {AppState} from "../models/AppState";
 
 class FigureList extends React.Component<any, any> {
     render() {
@@ -23,10 +24,10 @@ class FigureList extends React.Component<any, any> {
     }
 }
 
-const mapStateToProps = (state: any) => {
+const mapStateToProps = (state: AppState) => {
     return {
-        figures: state,
-        selectedFigures: state.filter((e: any)=> e.selected)
+        figures: state.canvas.elements,
+        selectedFigures: state.canvas.elements.filter((e: any)=> e.selected)
     }
 };
 

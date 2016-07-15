@@ -1,73 +1,23 @@
-const figures = (state: any[] = [], action: any) => {
-    let figure: any;
-    let newState: any[] = [];
+import {AppState} from "../models/AppState";
+import {SimpleAction} from "../actions/index";
 
+function editorApp(state: AppState = new AppState(), action: SimpleAction): AppState {
     switch (action.type) {
         case 'ADD_FIGURE':
-            return [
-                ...state,
-                action.figure
-            ];
+            return state.addElement(action.figure);
         case 'MOVE_FIGURE':
-            for (let i = 0; i < state.length; i++) {
-                const figure = state[i];
-
-                if (figure.id == action.figure.id) {
-                    newState.push(Object.assign({}, figure, { x: action.figure.x, y: action.figure.y }))
-                } else {
-                    newState.push(figure)
-                }
-            }
-
-            return newState;
+            return state.moveElement(action.figure.id, action.figure.x, action.figure.y);
         case 'SELECT_FIGURE':
-            for (let i = 0; i < state.length; i++) {
-                const figure = state[i];
-
-                if (figure.id == action.figure.id) {
-                    newState.push(Object.assign({}, figure, { selected: true }))
-                } else if (figure.selected) {
-                    newState.push(Object.assign({}, figure, { selected: false }))
-                } else {
-                    newState.push(figure)
-                }
-            }
-
-            return newState;
+            return state.selectElement(action.figure.id);
         case 'SEND_TO_BACK':
-            figure = state.find(e => e.selected);
-
-            if (figure) {
-                return [figure, ...state.filter(e => e.id != figure.id)];
-            } else {
-                return state;
-            }
+            return state.sendSelectedElementToBack();
         case 'BRING_TO_TOP':
-            figure = state.find(e => e.selected);
-
-            if (figure) {
-                return [...state.filter(e => e.id != figure.id), figure];
-            } else {
-                return state;
-            }
+            return state.bringSelectedElementToTop();
         case 'DESELECT_ALL':
-            if (state.some(f => f.selected )) {
-                for (let i = 0; i < state.length; i++) {
-                    const figure = state[i];
-
-                    if (figure.selected) {
-                        newState.push(Object.assign({}, figure, { selected: false }))
-                    } else {
-                        newState.push(figure)
-                    }
-                }
-                return newState;
-            } else {
-                return state;
-            }
+            return state.deselectAll();
         default:
             return state
     }
-};
+}
 
-export default figures;
+export default editorApp;

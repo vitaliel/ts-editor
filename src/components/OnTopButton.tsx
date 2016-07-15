@@ -1,6 +1,7 @@
 import * as React from "react";
 import { connect } from 'react-redux'
 import { bringToTop } from '../actions';
+import {AppState} from "../models/AppState";
 
 const mapDispatchToProps = (dispatch: any) => {
     return {
@@ -10,9 +11,9 @@ const mapDispatchToProps = (dispatch: any) => {
     }
 };
 
-const mapStateToProps = (state: any[]) => {
+const mapStateToProps = (state: AppState) => {
     return {
-        disabled: !state.some(fig => fig.selected)
+        disabled: !state.canvas.elements.some(fig => fig.selected)
     }
 };
 

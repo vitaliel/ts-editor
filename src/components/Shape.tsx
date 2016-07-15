@@ -5,7 +5,7 @@ import {connect} from "react-redux";
 
 export interface FigureProps {
     id: number;
-    type: string;
+    shape: string;
     x: number;
     y: number;
     selected?: boolean;
@@ -82,7 +82,7 @@ class Shape extends React.Component<FigureProps & Dispatch, any> {
         let onClick = this.onClick.bind(this);
         const klass = this.props.selected ? 'selected' : '';
 
-        if (this.props.type == 'triangle') {
+        if (this.props.shape == 'triangle') {
             const x1 = this.props.x, y1 = this.props.y + size;
             const x2 = this.props.x + size;
             const y2 = this.props.y + size;
@@ -93,7 +93,7 @@ class Shape extends React.Component<FigureProps & Dispatch, any> {
                             className={klass}
                             points={points} fill="#fff" stroke="#000"/>;
         }
-        else if (this.props.type == 'circle') {
+        else if (this.props.shape == 'circle') {
             const r = size / 2;
             return <ellipse onMouseDown={onMouseDown} onClick={onClick}
                             className={klass}
