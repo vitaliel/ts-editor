@@ -1,19 +1,23 @@
-const figures = (state: any[] = [], action: any) => {
+import {AppState} from "../models/AppState";
+import {SimpleAction} from "../actions/index";
+
+function editorApp(state: AppState = new AppState(), action: SimpleAction): AppState {
     switch (action.type) {
         case 'ADD_FIGURE':
-            return [
-                ...state,
-                action.figure
-            ];
+            return state.addElement(action.figure);
         case 'MOVE_FIGURE':
-            const oldFigure = state.find(e => e.id == action.figure.id);
-            const figure = Object.assign({}, oldFigure);
-            figure.x = action.figure.x;
-            figure.y = action.figure.y;
-            return state.filter(e => e.id != action.figure.id).concat(figure);
+            return state.moveElement(action.figure.id, action.figure.x, action.figure.y);
+        case 'SELECT_FIGURE':
+            return state.selectElement(action.figure.id);
+        case 'SEND_TO_BACK':
+            return state.sendSelectedElementToBack();
+        case 'BRING_TO_TOP':
+            return state.bringSelectedElementToTop();
+        case 'DESELECT_ALL':
+            return state.deselectAll();
         default:
             return state
     }
-};
+}
 
-export default figures;
+export default editorApp;

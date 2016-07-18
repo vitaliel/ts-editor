@@ -1,68 +1,60 @@
 import * as React from "react";
-import {FigureProps} from "./FigureProps";
-import {DragSessionEvent, DragSession} from "../utils/drag_drop/drag_drop";
-import {moveFigure} from "../actions/index";
+import {selectFigure} from "../actions/index";
 import {connect} from "react-redux";
+
+export interface FigureProps {
+    id: number;
+    shape: string;
+    x: number;
+    y: number;
+    selected?: boolean;
+}
+
+interface Dispatch {
+    onSelectFigure: (id: number) => void;
+}
 
 const mapDispatchToProps = (dispatch: any): any => {
     return {
-        onMoveFigure: (id: number, x: number, y: number) => {
-            dispatch(moveFigure(id, x, y))
+        onSelectFigure: (id: number) => {
+            dispatch(selectFigure(id))
         }
     }
 };
 
-class Shape extends React.Component<FigureProps, any> {
-    // hack :-)
-    refs: {
-        [key: string]: (Element);
-        element: HTMLElement;
-    };
+const size = 70;
 
-    onMouseDown(e: MouseEvent) {
-        if (e.button != 0) return;
-
-        new DragSession(
-            e,
-            (e: DragSessionEvent) => {
-                this.refs.element.style.transform = `translate(${e.translation.x}px, ${e.translation.y}px)`;
-            },
-            (e: DragSessionEvent) => {
-                this.refs.element.style.transform = "";
-                const dm = e.translation;
-
-                if (dm.x != 0 || dm.y != 0) {
-                    let nx = this.props.x + dm.x;
-                    let ny = this.props.y + dm.y;
-                    this.props.onMoveFigure(this.props.id, nx, ny)
-                }
-            }
-        );
+class Shape extends React.Component<FigureProps & Dispatch, any> {
+    onClick(e: MouseEvent) {
+        e.stopPropagation();
+        this.props.onSelectFigure(this.props.id);
     }
 
-    // svg does not support style.transform
     render() {
-        let onMouseDown = this.onMouseDown.bind(this);
-        const size = 70;
+        let onClick = this.onClick.bind(this);
+        const klass = this.props.selected ? 'selected' : '';
 
-        if (this.props.type == 'triangle') {
+        if (this.props.shape == 'triangle') {
             const x1 = this.props.x, y1 = this.props.y + size;
             const x2 = this.props.x + size;
             const y2 = this.props.y + size;
             const x3 = this.props.x + size / 2;
             const y3 = this.props.y;
             const points = `${x1},${y1} ${x2},${y2} ${x3},${y3}`;
-            return <polygon onMouseDown={onMouseDown}
-                            ref="element" points={points} fill="#fff" stroke="#000"/>;
+            return <polygon onClick={onClick}
+                            className={klass}
+                            points={points} fill="#fff" stroke="#000"/>;
         }
-        else if (this.props.type == 'circle')
-            return <ellipse onMouseDown={onMouseDown}
-                            ref="element" cx={this.props.x} cy={this.props.y} rx={size/2} ry={size/2} fill="#fff"
+        else if (this.props.shape == 'circle') {
+            const r = size / 2;
+            return <ellipse onClick={onClick}
+                            className={klass}
+                            cx={this.props.x+r} cy={this.props.y+r} rx={r} ry={r} fill="#fff"
                             stroke="#000"/>;
-        else
+        } else
             return (
-                <rect onMouseDown={onMouseDown}
-                      ref="element"
+                <rect onClick={onClick}
+                      className={klass}
                       width={size}
                       height={size}
                       x={this.props.x}

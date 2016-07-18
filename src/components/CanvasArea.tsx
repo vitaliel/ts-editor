@@ -2,22 +2,34 @@ import * as React from "react";
 import { findDOMNode } from 'react-dom';
 
 import FigureList from "./FigureList";
-import {addFigure} from "../actions/index";
+import {addFigure, deselectAll} from "../actions/index";
 import {connect} from "react-redux";
 
 const mapDispatchToProps = (dispatch: any) => {
     return {
         onDropFigure: (type: string, x: number, y :number) => {
             dispatch(addFigure(type, x, y))
+        },
+        onDeselectAll: () => {
+            dispatch(deselectAll())
         }
     }
 };
 
 interface ICanvasArea {
     onDropFigure(type: string, x: number, y :number): void;
+    onDeselectAll() : void;
 }
 
 class CanvasArea extends React.Component<ICanvasArea, any> {
+    onClick(e: React.MouseEvent) {
+        const element = e.target as HTMLElement;
+
+        if (element.id == 'canvasSvg') {
+            this.props.onDeselectAll()
+        }
+    }
+
     private onDragOver(e: DragEvent) {
         e.preventDefault();
     }
@@ -38,7 +50,7 @@ class CanvasArea extends React.Component<ICanvasArea, any> {
         let onDrop = this.onDrop.bind(this);
 
         return (
-            <div id="canvas_area" onDragOver={onDragOver} onDrop={onDrop}>
+            <div id="canvas_area" onDragOver={onDragOver} onDrop={onDrop} onClick={(e)=> this.onClick(e)}>
                 <FigureList/>
             </div>
         );
