@@ -4,9 +4,14 @@
   "description": "",
   "main": "./dist/bundle.js",
   "scripts": {
+    "postinstall": "./node_modules/.bin/typings install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/vitaliel/ts-editor.git"
+  },
+  "author": "Vitalie Lazu",
   "license": "ISC",
   "dependencies": {
     "react": "^15.2.0",

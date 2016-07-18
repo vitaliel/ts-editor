@@ -22,6 +22,14 @@ interface ICanvasArea {
 }
 
 class CanvasArea extends React.Component<ICanvasArea, any> {
+    onClick(e: React.MouseEvent) {
+        const element = e.target as HTMLElement;
+
+        if (element.id == 'canvasSvg') {
+            this.props.onDeselectAll()
+        }
+    }
+
     private onDragOver(e: DragEvent) {
         e.preventDefault();
     }
@@ -42,7 +50,7 @@ class CanvasArea extends React.Component<ICanvasArea, any> {
         let onDrop = this.onDrop.bind(this);
 
         return (
-            <div id="canvas_area" onDragOver={onDragOver} onDrop={onDrop} onClick={()=> this.props.onDeselectAll()}>
+            <div id="canvas_area" onDragOver={onDragOver} onDrop={onDrop} onClick={(e)=> this.onClick(e)}>
                 <FigureList/>
             </div>
         );
