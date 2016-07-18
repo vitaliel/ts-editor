@@ -197,7 +197,7 @@
 	const React = __webpack_require__(1);
 	const react_dom_1 = __webpack_require__(2);
 	const FigureList_1 = __webpack_require__(10);
-	const index_1 = __webpack_require__(37);
+	const index_1 = __webpack_require__(35);
 	const react_redux_1 = __webpack_require__(11);
 	const mapDispatchToProps = (dispatch) => {
 	    return {
@@ -210,6 +210,12 @@
 	    };
 	};
 	class CanvasArea extends React.Component {
+	    onClick(e) {
+	        const element = e.target;
+	        if (element.id == 'canvasSvg') {
+	            this.props.onDeselectAll();
+	        }
+	    }
 	    onDragOver(e) {
 	        e.preventDefault();
 	    }
@@ -224,7 +230,7 @@
 	    render() {
 	        let onDragOver = this.onDragOver.bind(this);
 	        let onDrop = this.onDrop.bind(this);
-	        return (React.createElement("div", {id: "canvas_area", onDragOver: onDragOver, onDrop: onDrop, onClick: () => this.props.onDeselectAll()}, React.createElement(FigureList_1.default, null)));
+	        return (React.createElement("div", {id: "canvas_area", onDragOver: onDragOver, onDrop: onDrop, onClick: (e) => this.onClick(e)}, React.createElement(FigureList_1.default, null)));
 	    }
 	}
 	Object.defineProperty(exports, "__esModule", { value: true });
@@ -247,10 +253,10 @@
 	const React = __webpack_require__(1);
 	const react_redux_1 = __webpack_require__(11);
 	const Shape_1 = __webpack_require__(34);
-	const ShapeSelection_1 = __webpack_require__(39);
+	const ShapeSelection_1 = __webpack_require__(37);
 	class FigureList extends React.Component {
 	    render() {
-	        return (React.createElement("svg", {width: "100%", height: "100%"}, React.createElement("g", {id: "canvas_elements"}, this.props.figures.map((figure) => React.createElement(Shape_1.default, __assign({key: figure.id}, figure)))), React.createElement("g", {id: "selected_elements"}, this.props.selectedFigures.map((figure) => React.createElement(ShapeSelection_1.default, __assign({key: figure.id}, figure))))));
+	        return (React.createElement("svg", {width: "100%", height: "100%", id: "canvasSvg"}, React.createElement("g", {id: "canvas_elements"}, this.props.figures.map((figure) => React.createElement(Shape_1.default, __assign({key: figure.id}, figure)))), React.createElement("g", {id: "selected_elements"}, this.props.selectedFigures.map((figure) => React.createElement(ShapeSelection_1.default, __assign({key: figure.id}, figure))))));
 	    }
 	}
 	const mapStateToProps = (state) => {
@@ -1946,14 +1952,10 @@
 
 	"use strict";
 	const React = __webpack_require__(1);
-	const drag_drop_1 = __webpack_require__(35);
-	const index_1 = __webpack_require__(37);
+	const index_1 = __webpack_require__(35);
 	const react_redux_1 = __webpack_require__(11);
 	const mapDispatchToProps = (dispatch) => {
 	    return {
-	        onMoveFigure: (id, x, y) => {
-	            dispatch(index_1.moveFigure(id, x, y));
-	        },
 	        onSelectFigure: (id) => {
 	            dispatch(index_1.selectFigure(id));
 	        }
@@ -1965,34 +1967,7 @@
 	        e.stopPropagation();
 	        this.props.onSelectFigure(this.props.id);
 	    }
-	    onMouseDown(e) {
-	        if (e.button != 0)
-	            return;
-	        if (!this.props.selected) {
-	            return;
-	        }
-	        new drag_drop_1.DragSession(e, (e) => {
-	            const selectedElements = document.querySelectorAll("#canvas_area .selected");
-	            for (let i = 0; i < selectedElements.length; i++) {
-	                const element = selectedElements[i];
-	                element.style.transform = `translate(${e.translation.x}px, ${e.translation.y}px)`;
-	            }
-	        }, (e) => {
-	            const selectedElements = document.querySelectorAll("#canvas_area .selected");
-	            for (let i = 0; i < selectedElements.length; i++) {
-	                const element = selectedElements[i];
-	                element.style.transform = "";
-	            }
-	            const dm = e.translation;
-	            if (dm.x != 0 || dm.y != 0) {
-	                let nx = this.props.x + dm.x;
-	                let ny = this.props.y + dm.y;
-	                this.props.onMoveFigure(this.props.id, nx, ny);
-	            }
-	        });
-	    }
 	    render() {
-	        let onMouseDown = this.onMouseDown.bind(this);
 	        let onClick = this.onClick.bind(this);
 	        const klass = this.props.selected ? 'selected' : '';
 	        if (this.props.shape == 'triangle') {
@@ -2002,14 +1977,14 @@
 	            const x3 = this.props.x + size / 2;
 	            const y3 = this.props.y;
 	            const points = `${x1},${y1} ${x2},${y2} ${x3},${y3}`;
-	            return React.createElement("polygon", {onMouseDown: onMouseDown, onClick: onClick, className: klass, points: points, fill: "#fff", stroke: "#000"});
+	            return React.createElement("polygon", {onClick: onClick, className: klass, points: points, fill: "#fff", stroke: "#000"});
 	        }
 	        else if (this.props.shape == 'circle') {
 	            const r = size / 2;
-	            return React.createElement("ellipse", {onMouseDown: onMouseDown, onClick: onClick, className: klass, cx: this.props.x + r, cy: this.props.y + r, rx: r, ry: r, fill: "#fff", stroke: "#000"});
+	            return React.createElement("ellipse", {onClick: onClick, className: klass, cx: this.props.x + r, cy: this.props.y + r, rx: r, ry: r, fill: "#fff", stroke: "#000"});
 	        }
 	        else
-	            return (React.createElement("rect", {onMouseDown: onMouseDown, onClick: onClick, className: klass, width: size, height: size, x: this.props.x, y: this.props.y, fill: "#fff", stroke: "#000"}));
+	            return (React.createElement("rect", {onClick: onClick, className: klass, width: size, height: size, x: this.props.x, y: this.props.y, fill: "#fff", stroke: "#000"}));
 	    }
 	}
 	Object.defineProperty(exports, "__esModule", { value: true });
@@ -2021,65 +1996,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	const point_1 = __webpack_require__(36);
-	class DragSessionEvent {
-	    constructor(session, translation) {
-	        this.session = session;
-	        this.translation = translation;
-	    }
-	}
-	exports.DragSessionEvent = DragSessionEvent;
-	class DragSession {
-	    constructor(e, _onDragCallback, _onDropCallback) {
-	        this._onDragCallback = _onDragCallback;
-	        this._onDropCallback = _onDropCallback;
-	        this._startDragPoint = new point_1.Point(e.clientX, e.clientY);
-	        window.addEventListener("mousemove", this._windowOnMouseMoveFn = this._onMouseMove.bind(this));
-	        window.addEventListener("mouseup", this._windowOnMouseUpFn = this._onMouseUp.bind(this));
-	    }
-	    getTranslation(e) {
-	        return new point_1.Point(e.clientX, e.clientY).subtract(this._startDragPoint);
-	    }
-	    _onMouseMove(e) {
-	        this._onDragCallback(new DragSessionEvent(this, this.getTranslation(e)));
-	    }
-	    _onMouseUp(e) {
-	        window.removeEventListener("mousemove", this._windowOnMouseMoveFn);
-	        window.removeEventListener("mouseup", this._windowOnMouseUpFn);
-	        this._onDropCallback(new DragSessionEvent(this, this.getTranslation(e)));
-	    }
-	}
-	exports.DragSession = DragSession;
-
-
-/***/ },
-/* 36 */
-/***/ function(module, exports) {
-
-	"use strict";
-	class Point {
-	    constructor(x, y) {
-	        this.x = x;
-	        this.y = y;
-	    }
-	    subtract(other) {
-	        this.x -= other.x;
-	        this.y -= other.y;
-	        return this;
-	    }
-	    clone() {
-	        return new Point(this.x, this.y);
-	    }
-	}
-	exports.Point = Point;
-
-
-/***/ },
-/* 37 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	const CanvasElement_1 = __webpack_require__(38);
+	const CanvasElement_1 = __webpack_require__(36);
 	let nextFigureId = 0;
 	function addFigure(shape, x, y) {
 	    return {
@@ -2111,7 +2028,7 @@
 
 
 /***/ },
-/* 38 */
+/* 36 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2133,22 +2050,114 @@
 
 
 /***/ },
-/* 39 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	const React = __webpack_require__(1);
+	const drag_drop_1 = __webpack_require__(38);
+	const react_redux_1 = __webpack_require__(11);
+	const index_1 = __webpack_require__(35);
 	const size = 70;
+	const mapDispatchToProps = (dispatch) => {
+	    return {
+	        onMoveFigure: (id, x, y) => {
+	            dispatch(index_1.moveFigure(id, x, y));
+	        }
+	    };
+	};
 	class ShapeSelection extends React.Component {
+	    onMouseDown(e) {
+	        if (e.button != 0)
+	            return;
+	        new drag_drop_1.DragSession(e, (e) => {
+	            const selectedElements = document.querySelectorAll("#canvas_area .selected");
+	            for (let i = 0; i < selectedElements.length; i++) {
+	                const element = selectedElements[i];
+	                element.style.transform = `translate(${e.translation.x}px, ${e.translation.y}px)`;
+	            }
+	        }, (e) => {
+	            const selectedElements = document.querySelectorAll("#canvas_area .selected");
+	            for (let i = 0; i < selectedElements.length; i++) {
+	                const element = selectedElements[i];
+	                element.style.transform = "";
+	            }
+	            const dm = e.translation;
+	            if (dm.x != 0 || dm.y != 0) {
+	                let nx = this.props.x + dm.x;
+	                let ny = this.props.y + dm.y;
+	                this.props.onMoveFigure(this.props.id, nx, ny);
+	            }
+	        });
+	    }
 	    renderSelectionPoint(x, y) {
 	        return React.createElement("rect", {x: x - 2, y: y - 2, width: 4, height: 4, fill: "#000", stroke: "#000", className: "selected"});
 	    }
 	    render() {
-	        return React.createElement("g", null, React.createElement("rect", {x: this.props.x, y: this.props.y, width: size, height: size, stroke: "#000", className: "selected selected_rect"}), this.renderSelectionPoint(this.props.x, this.props.y), this.renderSelectionPoint(this.props.x + size, this.props.y), this.renderSelectionPoint(this.props.x, this.props.y + size), this.renderSelectionPoint(this.props.x + size, this.props.y + size));
+	        let onMouseDown = this.onMouseDown.bind(this);
+	        return React.createElement("g", null, React.createElement("rect", {onMouseDown: onMouseDown, x: this.props.x, y: this.props.y, width: size, height: size, stroke: "#000", className: "selected selected_rect"}), this.renderSelectionPoint(this.props.x, this.props.y), this.renderSelectionPoint(this.props.x + size, this.props.y), this.renderSelectionPoint(this.props.x, this.props.y + size), this.renderSelectionPoint(this.props.x + size, this.props.y + size));
 	    }
 	}
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = ShapeSelection;
+	exports.default = react_redux_1.connect(null, mapDispatchToProps)(ShapeSelection);
+
+
+/***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	const point_1 = __webpack_require__(39);
+	class DragSessionEvent {
+	    constructor(session, translation) {
+	        this.session = session;
+	        this.translation = translation;
+	    }
+	}
+	exports.DragSessionEvent = DragSessionEvent;
+	class DragSession {
+	    constructor(e, _onDragCallback, _onDropCallback) {
+	        this._onDragCallback = _onDragCallback;
+	        this._onDropCallback = _onDropCallback;
+	        this._startDragPoint = new point_1.Point(e.clientX, e.clientY);
+	        window.addEventListener("mousemove", this._windowOnMouseMoveFn = this._onMouseMove.bind(this));
+	        window.addEventListener("mouseup", this._windowOnMouseUpFn = this._onMouseUp.bind(this));
+	    }
+	    getTranslation(e) {
+	        return new point_1.Point(e.clientX, e.clientY).subtract(this._startDragPoint);
+	    }
+	    _onMouseMove(e) {
+	        this._onDragCallback(new DragSessionEvent(this, this.getTranslation(e)));
+	    }
+	    _onMouseUp(e) {
+	        window.removeEventListener("mousemove", this._windowOnMouseMoveFn);
+	        window.removeEventListener("mouseup", this._windowOnMouseUpFn);
+	        this._onDropCallback(new DragSessionEvent(this, this.getTranslation(e)));
+	    }
+	}
+	exports.DragSession = DragSession;
+
+
+/***/ },
+/* 39 */
+/***/ function(module, exports) {
+
+	"use strict";
+	class Point {
+	    constructor(x, y) {
+	        this.x = x;
+	        this.y = y;
+	    }
+	    subtract(other) {
+	        this.x -= other.x;
+	        this.y -= other.y;
+	        return this;
+	    }
+	    clone() {
+	        return new Point(this.x, this.y);
+	    }
+	}
+	exports.Point = Point;
 
 
 /***/ },
@@ -2158,7 +2167,7 @@
 	"use strict";
 	const React = __webpack_require__(1);
 	const react_redux_1 = __webpack_require__(11);
-	const index_1 = __webpack_require__(37);
+	const index_1 = __webpack_require__(35);
 	const mapDispatchToProps = (dispatch) => {
 	    return {
 	        onClick: () => {
@@ -2187,7 +2196,7 @@
 	"use strict";
 	const React = __webpack_require__(1);
 	const react_redux_1 = __webpack_require__(11);
-	const actions_1 = __webpack_require__(37);
+	const actions_1 = __webpack_require__(35);
 	const mapDispatchToProps = (dispatch) => {
 	    return {
 	        onClick: () => {
